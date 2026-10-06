@@ -1,0 +1,29 @@
+name: Build Python package and test it
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build and test Python package
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v7
+
+      - name: Setup hatch
+        uses: pypa/hatch@install
+
+      - name: Build and test
+        run: hatch test --all
