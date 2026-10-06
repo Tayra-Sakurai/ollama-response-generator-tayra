@@ -64,7 +64,7 @@ omit = [
 ]
 
 [[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.14", "3.14t", "3.13", "3.12"]
+python = ["3.14", "3.13", "3.12"]
 
 [tool.coverage.paths]
 ollama_response_generator_tayra = ["src/ollama_response_generator_tayra", "*/ollama-response-generator-tayra/src/ollama_response_generator_tayra"]
