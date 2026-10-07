@@ -27,7 +27,7 @@ class ChatData(BaseModel):
     )
 
 
-class StartRegExp:
+class StartRegExp(BaseModel):
     """Expresses the start pattern of a message.
 
     Args:

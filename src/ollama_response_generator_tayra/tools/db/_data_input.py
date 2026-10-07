@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Input chat data."""
-from langchain_core.embeddings import Embeddings
+from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
 from langchain_core.language_models import BaseChatModel
 from langchain.agents import create_agent
@@ -11,6 +11,13 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from ._models import ChatData, StartRegExp
 from os import PathLike
 from typing import Any
+
+__all__ = [
+    'get_message_pattern',
+    'load_file_content',
+    'structure_data_file',
+    'install_to_db',
+]
 
 
 def get_message_pattern(
@@ -50,6 +57,7 @@ Since multi-line messages exist, please be sure to match ONLY the first line of 
     if isinstance(result, StartRegExp):
         return result.exp
     elif isinstance(result, dict):
+        print(result)
         return result['exp']
     else:
         raise TypeError('Structured type mismatched.')
@@ -129,3 +137,26 @@ def structure_data_file(
         else:
             raise TypeError('Invalid return format.')
     return data
+
+
+def install_to_db(
+    db_provider: VectorStore,
+    data: list[ChatData]
+) -> None:
+    """Installs the data onto the designated database.
+
+    Args:
+        db_provider: The database provider object.
+        data: The data to be stored in the database.
+    """
+    documents: list[Document] = []
+    for datumn in data:
+        document = Document(
+            page_content=datumn.content,
+            metadata={
+                'timestamp': datumn.timestamp,
+                'role': datumn.user,
+            }
+        )
+        documents.append(document)
+    db_provider.add_documents(documents)
