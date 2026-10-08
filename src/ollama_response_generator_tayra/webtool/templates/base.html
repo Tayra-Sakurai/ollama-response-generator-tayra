@@ -11,6 +11,8 @@
     <main>{% block body %}{% endblock %}</main>
     <script src="{% static 'library/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'library/bootstrap/bootstrap.bundle.min.js' %}"></script>
-    {% block scripts %}{% endblock %}
+    {% block scripts %}
+      <script src="{% static 'app.js' %}"></script>
+    {% endblock %}
   </body>
 </html>
