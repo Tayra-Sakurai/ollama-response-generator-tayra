@@ -5,9 +5,12 @@
     <mata name="viewport" content="width=device-width" />
     <meta name="description" content="{% block description %}Ollama response generator app.{% endblock %}" />
     <title>{% block title %}Ollama Response Generator - Tayra{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'library/bootstrap/bootstrap.min.css' %}" />
   </head>
   <body>
     <main>{% block body %}{% endblock %}</main>
+    <script src="{% static 'library/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'library/bootstrap/bootstrap.bundle.min.js' %}"></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>
