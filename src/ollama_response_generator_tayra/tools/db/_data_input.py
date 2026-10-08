@@ -45,6 +45,8 @@ def get_message_pattern(
 
 Since multi-line messages exist, please be sure to match ONLY the first line of message.
 
+Plus, please note that the chat history has a header data to ignore on the top of the file.
+
 # Chat History
 
 {''.join(text)}
@@ -58,33 +60,36 @@ Since multi-line messages exist, please be sure to match ONLY the first line of 
         return result.exp
     elif isinstance(result, dict):
         print(result)
-        return result['exp']
+        return result['structured_response'].exp
     else:
         raise TypeError('Structured type mismatched.')
 
 
 def load_file_content(
     file_path: str | PathLike[Any],
-    encoding: str = 'utf-8'
+    encoding: str = 'utf-8',
+    newline: str = '\n'
 ) -> list[str]:
     """Gets the first ten lines of the chat history text file.
 
     Args:
         file_path: The file path to the data file.
         encoding: The codec of the text file.
+        newline: The line delimiter of the file.
 
     Returns:
         The file contents.
     """
-    with open(file_path, 'r', encoding=encoding) as file:
-        return file.readlines(10)
+    with open(file_path, 'r', encoding=encoding, newline=newline) as file:
+        return file.readlines()[:11]
 
 
 def structure_data_file(
     model: BaseChatModel,
     file_path: str | PathLike[Any],
     pattern: str,
-    encoding: str = 'utf-8'
+    encoding: str = 'utf-8',
+    newline: str = '\n'
 ) -> list[ChatData]:
     """Retreives the chats from the chat history data.
 
@@ -93,6 +98,7 @@ def structure_data_file(
         file_path: The path to the history data file.
         pattern: The pattern to detect the message.
         encoding: The codec of the chat history file.
+        newline: The line delimiter of the file.
 
     Returns:
         The data from the chat history.
@@ -101,7 +107,7 @@ def structure_data_file(
         TypeError: The return type from the LLM was not valid.
     """
     content: str
-    with open(file_path, 'r', encoding=encoding) as file:
+    with open(file_path, 'r', encoding=encoding, newline=newline) as file:
         content = file.read()
     structured = create_agent(
         model=model,
@@ -109,10 +115,10 @@ def structure_data_file(
         response_format=ChatData
     )
     splitter = RecursiveCharacterTextSplitter(
-        separators=[pattern],
+        separators=[pattern.removeprefix('^').removesuffix('$')],
         is_separator_regex=True,
         chunk_size=50,
-        chunk_overlap=50
+        chunk_overlap=5
     )
     chunks = splitter.split_text(content)
     data: list[ChatData] = []
@@ -132,8 +138,11 @@ def structure_data_file(
                 ],
             }
         )
+        print('Result:', result)
         if isinstance(result, ChatData):
             data.append(result)
+        elif isinstance(result, dict):
+            data.append(result['structured_response'])
         else:
             raise TypeError('Invalid return format.')
     return data
@@ -149,6 +158,7 @@ def install_to_db(
         db_provider: The database provider object.
         data: The data to be stored in the database.
     """
+    print(data)
     documents: list[Document] = []
     for datumn in data:
         document = Document(
